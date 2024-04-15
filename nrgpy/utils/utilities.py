@@ -55,13 +55,14 @@ def count_files(
         seconds; if set, use as reference; only count if file is newer than start_time
     """
     file_list = []
+    ext = ".{}".format(extension.lower())
 
     for dirpath, subdirs, files in os.walk(directory):
         for x in files:
             path = os.path.join(dirpath, x)
             if os.path.isfile(path):
                 if filters in x:
-                    if extension.lower() in x.lower():
+                    if os.path.splitext(x)[1].lower() == ext:
                         if (start_time is None) or (os.path.getmtime(path) > start_time):
                                 file_list.append(x)
 
