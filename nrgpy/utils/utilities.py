@@ -58,10 +58,11 @@ def count_files(
 
     for dirpath, subdirs, files in os.walk(directory):
         for x in files:
-            if os.path.isfile(os.path.join(directory, x)):
+            path = os.path.join(dirpath, x)
+            if os.path.isfile(path):
                 if filters in x:
                     if extension.lower() in x.lower():
-                        if (start_time is None) or (os.path.getmtime(os.path.join(dirpath, x)) > start_time):
+                        if (start_time is None) or (os.path.getmtime(path) > start_time):
                                 file_list.append(x)
 
     count = len(file_list)
