@@ -37,7 +37,7 @@ def check_platform() -> sys.platform:
 
 
 def count_files(
-    directory: str, filters: str, extension: str, show_files: bool = False, **kwargs
+    directory: str, filters: str, extension: str, show_files: bool = False, start_time: int = None, **kwargs
 ) -> int:
     """counts the number of files in the first level of a directory
 
@@ -51,11 +51,9 @@ def count_files(
         secondary filter
     show_files : bool, optional
         if set to True, prints file name
-    start_time :  int
+    start_time :  int, optional
         seconds; if set, use as reference; only count if file is newer than start_time
     """
-    if "start_time" in kwargs:
-        start_time = kwargs.get("start_time")
     count = 0
     file_list = []
 
@@ -64,14 +62,9 @@ def count_files(
             if os.path.isfile(os.path.join(directory, x)):
                 if filters in x:
                     if extension.lower() in x.lower():
-                        try:
-                            if os.path.getmtime(os.path.join(dirpath, x)) > start_time:
+                        if (start_time is None) or (os.path.getmtime(os.path.join(dirpath, x)) > start_time):
                                 file_list.append(x)
                                 count = count + 1
-
-                        except NameError:
-                            file_list.append(x)
-                            count = count + 1
 
     if show_files:
         return count, file_list
