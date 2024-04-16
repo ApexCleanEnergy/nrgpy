@@ -334,8 +334,7 @@ class local:
                     pass
 
                 try:
-                    # shutil.copy(os.path.join(self.rwd_dir, f), os.path.join(site_folder))
-                    shutil.copy(self.rwd_dir + f, os.path.join(site_folder))
+                    shutil.copy(os.path.join(self.rwd_dir, f), site_folder)
                 except Exception:
                     import traceback
 
@@ -343,7 +342,7 @@ class local:
 
                     print(traceback.format_exc())
                     print(os.path.join(self.rwd_dir, f))
-                    print(os.path.join(site_folder))
+                    print(site_folder)
 
     def _copy_txt_file(self):
         """copy TXT file from self.ScaledData to self.out_dir"""
