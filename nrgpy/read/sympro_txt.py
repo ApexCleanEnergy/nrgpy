@@ -444,7 +444,7 @@ class SymProTextRead:
             self.data.reset_index(drop=True, inplace=True)
             base.ch_info["ch"] = base.ch_info["Channel:"].astype(int)
             self.ch_info = (
-                base.ch_info.sort_values(by=["ch"])
+                base.ch_info.sort_values(by=["ch", "Effective Date:"])
                 .drop_duplicates(
                     subset=[
                         "Serial Number:",
