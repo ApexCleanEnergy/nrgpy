@@ -352,7 +352,7 @@ class SymProTextRead:
         else:
             self.txt_dir = linux_folder_path(txt_dir)
 
-        first_file = True
+        base = None
 
         files = [
             os.path.join(self.txt_dir, f)
@@ -385,9 +385,7 @@ class SymProTextRead:
                     flush=True,
                 )
 
-            if first_file:
-                first_file = False
-
+            if not base:
                 try:
                     base = sympro_txt_read(f, text_timestamps=self.text_timestamps)
                     if not progress_bar:
