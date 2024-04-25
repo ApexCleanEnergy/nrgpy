@@ -26,6 +26,30 @@ class TestDateCheck:
             not result
         ), f"expected false result from start: {start_date}, end: {end_date}, string: {string}"  # noqa: E501
 
+    def test_long_incr_sympro_format_passes(self):
+        # arrange
+        start_date = "2020-01-13"
+        end_date = "2020-01-13"
+        string = "001148_2020-01-13_00.00_000630100_meas.txt"
+        # act
+        result = string_date_check(start_date, end_date, string)
+        # assert
+        assert (
+            result
+        ), f"expected True result from start: {start_date}, end: {end_date}, string: {string}"  # noqa: E501
+
+    def test_long_incr_sympro_format_fails(self):
+        # arrange
+        start_date = "2020-01-14"
+        end_date = "2020-01-14"
+        string = "001148_2020-01-13_00.00_000630100_meas.txt"
+        # act
+        result = string_date_check(start_date, end_date, string)
+        # assert
+        assert (
+            not result
+        ), f"expected false result from start: {start_date}, end: {end_date}, string: {string}"  # noqa: E501
+
     def test_normal_zx_date_format_passes(self):
         # arrange
         start_date = "2023-07-01"

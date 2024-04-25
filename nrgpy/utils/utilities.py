@@ -13,6 +13,17 @@ import sys
 import traceback
 from typing import Union
 
+STRP_FORMAT_WITH_DASH = "%Y-%m-%d"
+# LOGR & SymphonieClassic
+DATE_FORMAT_NO_DASH = re.compile("([0-9]{4})([0-9]{2})([0-9]{2})")
+# ZX datafile
+DATE_FORMAT_ZX = re.compile("Y([0-9]{4})_M([0-9]{2})_D([0-9]{2})")
+# SymphoniePRO
+DATE_FORMAT_WITH_DASH = re.compile("([0-9]{4})-([0-9]{2})-([0-9]{2})")
+EXT_DATE_FORMAT_NO_DASH = re.compile("[0-9]{6}([0-9]{4})([0-9]{2})([0-9]{2})")
+# NRG Cloud TXT Export
+DATE_FORMAT_WITH_DOT = re.compile("([0-9]{4}).([0-9]{2}).([0-9]{2})")
+
 
 def affirm_directory(directory: str) -> None:
     """create directory if not exists
@@ -37,7 +48,12 @@ def check_platform() -> sys.platform:
 
 
 def count_files(
-    directory: str, filters: str, extension: str, show_files: bool = False, start_time: int = None, **kwargs
+    directory: str,
+    filters: str,
+    extension: str,
+    show_files: bool = False,
+    start_time: int = None,
+    **kwargs,
 ) -> int:
     """counts the number of files in the first level of a directory
 
@@ -64,7 +80,7 @@ def count_files(
                 if filters in path.name:
                     if path.suffix.lower() == ext:
                         if (start_time is None) or (path.stat().st_mtime > start_time):
-                                file_list.append(path.name)
+                            file_list.append(path.name)
 
     count = len(file_list)
 
@@ -85,50 +101,37 @@ def string_date_check(start_date: str, end_date: str, string: str) -> bool:
     string : str
         string including date to check
     """
-    # LOGR & SymphonieClassic
-    date_format_no_dash = "([0-9]{4}[0-9]{2}[0-9]{2})"
-    strp_format_no_dash = "%Y%m%d"
-    # ZX datafile
-    date_format_zx = "(Y[0-9]{4}_M[0-9]{2}_D[0-9]{2})"
-    strp_format_zx = "Y%Y_M%m_D%d"
-    # SymphoniePRO
-    date_format_with_dash = r"([0-9]{4}\-[0-9]{2}\-[0-9]{2})"
-    strp_format_with_dash = "%Y-%m-%d"
-    # NRG Cloud TXT Export
-    date_format_with_dot = r"([0-9]{4}\.[0-9]{2}\.[0-9]{2})"
-    strp_format_with_dot = "%Y.%m.%d"
 
     try:
-        start = datetime.strptime(start_date, strp_format_with_dash)
-        end = datetime.strptime(end_date, strp_format_with_dash)
+        start = datetime.strptime(start_date, STRP_FORMAT_WITH_DASH)
+        end = datetime.strptime(end_date, STRP_FORMAT_WITH_DASH)
     except TypeError:
         print(traceback.format_exc())
         start = start_date
         end = end_date
 
-    if re.search(date_format_no_dash, string):
-        date_text = re.search(date_format_no_dash, string)
-        try:
-            file_date = datetime.strptime(date_text[0], strp_format_no_dash)
-        except ValueError:
-            ext_date_format_no_dash = "([0-9]{6}[0-9]{4}[0-9]{2}[0-9]{2})"
-            date_text = re.search(ext_date_format_no_dash, string)
-            file_date = datetime.strptime(date_text[0][6:], strp_format_no_dash)
-
-    elif re.search(date_format_with_dash, string):
-        date_text = re.search(date_format_with_dash, string)
-        file_date = datetime.strptime(date_text[0], strp_format_with_dash)
-    elif re.search(date_format_with_dot, string):
-        date_text = re.search(date_format_with_dot, string)
-        file_date = datetime.strptime(date_text[0], strp_format_with_dot)
-    elif re.search(date_format_zx, string):
-        date_text = re.search(date_format_zx, string)
-        file_date = datetime.strptime(date_text[0], strp_format_zx)
-
-    if (file_date >= start) and (file_date <= end):
-        return True
+    for fmt in (
+        DATE_FORMAT_NO_DASH,
+        EXT_DATE_FORMAT_NO_DASH,
+        DATE_FORMAT_WITH_DASH,
+        DATE_FORMAT_WITH_DOT,
+        DATE_FORMAT_ZX,
+    ):
+        match = fmt.search(string)
+        if match:
+            y, m, d = map(int, match.groups())
+            try:
+                file_date = datetime(y, m, d)
+            except Exception as e:
+                logger.warning(
+                    f"Unable to parse date from {string} using {fmt}; y={y}, m={m}, d={d}; {e}"
+                )
+            else:
+                break
     else:
-        return False
+        raise ValueError(f"Unable to parse date from {string}")
+
+    return (file_date >= start) and (file_date <= end)
 
 
 # in case anyone is using this directly
